@@ -86,7 +86,7 @@ class TopicService(
             .filter { t ->
                 t.id == id
             }.findFirst().get()
-//            .orElseThrow { NotFoundException("The Topic cannot be found!") }
+            .orElseThrow { NotFoundException("The Topic cannot be found!") }
 
         this.topics = this.topics
             .minus(topic)
