@@ -85,7 +85,7 @@ class TopicService(
             .stream()
             .filter { t ->
                 t.id == id
-            }.findFirst().get()
+            }.findFirst()
             .orElseThrow { NotFoundException("The Topic cannot be found!") }
 
         this.topics = this.topics
