@@ -4,6 +4,7 @@ import br.com.nuone.forun.model.dto.CreateTopicForm
 import br.com.nuone.forun.model.dto.UpdateTopicForm
 import br.com.nuone.forun.model.view.TopicView
 import br.com.nuone.forun.service.TopicService
+import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -24,6 +25,7 @@ class TopicController(private val topicService: TopicService) {
     }
 
     @PostMapping()
+    @Transactional
     fun create(
         @RequestBody @Valid form: CreateTopicForm, uriBuilder: UriComponentsBuilder
     ): ResponseEntity<TopicView> {
@@ -33,14 +35,19 @@ class TopicController(private val topicService: TopicService) {
         return ResponseEntity.created(uri).body(topicView)
     }
 
-    @PutMapping()
-    fun update(@RequestBody @Valid form: UpdateTopicForm): ResponseEntity<TopicView> {
-        return ResponseEntity.ok(topicService.update(form))
+    @PutMapping("/topic/{id}")
+    @Transactional
+    fun update(
+        @RequestBody @Valid form: UpdateTopicForm,
+        @PathVariable id: Long
+    ): ResponseEntity<TopicView> {
+        return ResponseEntity.ok(topicService.update(id, form))
     }
 
     @DeleteMapping("/topic/{id}")
+    @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun delete(@PathVariable id: Long){
+    fun delete(@PathVariable id: Long) {
         topicService.delete(id);
     }
 

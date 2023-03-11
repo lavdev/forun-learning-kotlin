@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: <user>
+    url: jdbc:mariadb://127.0.0.1:3306/forun
+    password: <password>
+  jpa:
+    properties:
+      hibernate:
+        format_sql: 'true'
+    hibernate:
+      ddl-auto: none
+    show-sql: 'true'
+server:
+  error:
+    include-stacktrace: never

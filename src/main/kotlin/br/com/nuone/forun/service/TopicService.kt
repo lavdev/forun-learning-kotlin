@@ -7,29 +7,28 @@ import br.com.nuone.forun.model.Topic
 import br.com.nuone.forun.model.dto.CreateTopicForm
 import br.com.nuone.forun.model.dto.UpdateTopicForm
 import br.com.nuone.forun.model.view.TopicView
+import br.com.nuone.forun.repository.TopicRepository
 import org.springframework.stereotype.Service
 
 @Service
 class TopicService(
-    private var topics: List<Topic> = ArrayList(),
+    private val topicRepository: TopicRepository,
     private val topicViewMapper: TopicViewMapper,
     private val topicFormMapper: TopicFormMapper
 ) {
-
     fun findAll(): List<TopicView> {
-        return topics.stream().map { t -> topicViewMapper.map(t) }.toList()
+        return this.topicRepository
+            .findAll().map { t -> topicViewMapper.map(t) }.toList()
     }
 
     /**
      * Get Topic by ID
      */
     fun findById(id: Long): TopicView {
-        val topic = topics
-            .stream()
-            .filter { t ->
-                t.id == id
-            }.findFirst().get()
-        return topicViewMapper.map(topic);
+        val topic = this.topicRepository
+            .findById(id)
+            .orElseThrow { NotFoundException("The Topic cannot be found!") }
+        return topicViewMapper.map(topic)
     }
 
     /**
@@ -39,9 +38,7 @@ class TopicService(
      */
     fun create(form: CreateTopicForm): TopicView {
         val topic = topicFormMapper.map(form);
-        topic.id = topics.size.toLong() + 1;
-        this.topics = topics.plus(topicFormMapper.map(form))
-        return topicViewMapper.map(topic);
+        return topicViewMapper.map(this.topicRepository.save(topic))
     }
 
     /***
@@ -49,30 +46,24 @@ class TopicService(
      * @param {@link UpdateTopicForm}
      * @return {@link TopicView}
      */
-    fun update(form: UpdateTopicForm): TopicView {
+    fun update(id: Long, form: UpdateTopicForm): TopicView {
 
-        val topic = topics
-            .stream()
-            .filter { t ->
-                t.id == form.id
-            }.findFirst()
+        val topic = this.topicRepository
+            .findById(id)
             .orElseThrow { NotFoundException("The Topic cannot be found!") }
 
-        val updated = Topic(
-            topic.id,
-            form.title,
-            form.message,
-            topic.createdAt,
-            topic.course,
-            topic.author,
-            topic.status,
-            topic.answerLst
-        )
-
-        this.topics = this.topics
-            .minus(topic)
-            .plus(updated)
-
+        val updated = this.topicRepository.save(
+            Topic(
+                topic.id,
+                form.title,
+                form.message,
+                topic.createdAt,
+                topic.course,
+                topic.author,
+                topic.status,
+                topic.answerLst
+            )
+        );
         return topicViewMapper.map(updated);
     }
 
@@ -81,15 +72,10 @@ class TopicService(
      * @param id Topic´s  identification
      */
     fun delete(id: Long) {
-        val topic = topics
-            .stream()
-            .filter { t ->
-                t.id == id
-            }.findFirst()
+        val topic = this.topicRepository
+            .findById(id)
             .orElseThrow { NotFoundException("The Topic cannot be found!") }
-
-        this.topics = this.topics
-            .minus(topic)
+        this.topicRepository.delete(topic);
     }
 
 }
